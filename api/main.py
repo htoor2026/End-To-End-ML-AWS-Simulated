@@ -1,13 +1,10 @@
-import requests
-
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, ConfigDict, Field
-
 from pathlib import Path
 
+import requests
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-
+from pydantic import BaseModel, ConfigDict, Field
 
 app = FastAPI(
     title="House Price Prediction API",
@@ -330,5 +327,5 @@ def predict(features: HouseFeatures):
     except requests.exceptions.RequestException as error:
         raise HTTPException(
             status_code=502,
-            detail=f"Prediction service error: {str(error)}",
+            detail=f"Prediction service error: {error!s}",
         )
