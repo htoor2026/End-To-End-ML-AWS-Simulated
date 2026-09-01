@@ -1,0 +1,33 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# ZenML local state
+.zen/
+
+# MLflow local runs
+mlruns/
+
+# Extracted/generated data
+extracted_data/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+.ipynb_checkpoints/

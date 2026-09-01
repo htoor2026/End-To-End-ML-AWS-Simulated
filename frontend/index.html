@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>House Price Predictor</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+
+<body>
+
+    <main class="page">
+
+        <section class="hero">
+
+            <div class="hero-content">
+
+                <p class="eyebrow">
+                    MACHINE LEARNING PRICE ESTIMATION
+                </p>
+
+                <h1>
+                    House Price
+                    <span>Predictor</span>
+                </h1>
+
+                <p class="subtitle">
+                    Enter the property details below and get an
+                    ML-powered estimated sale price.
+                </p>
+
+                <div class="model-status">
+
+                    <span class="status-dot"></span>
+
+                    <span>
+                        Production model active
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="prediction-section">
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+                        <p class="section-label">
+                            PROPERTY DETAILS
+                        </p>
+
+                        <h2>
+                            Estimate a property value
+                        </h2>
+                    </div>
+
+                </div>
+
+
+                <form id="prediction-form">
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+
+                            <label for="lot-area">
+                                Lot Area
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <input
+                                    id="lot-area"
+                                    type="number"
+                                    value="9600"
+                                    min="1"
+                                    required
+                                >
+
+                                <span class="unit">
+                                    sq ft
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="living-area">
+                                Living Area
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <input
+                                    id="living-area"
+                                    type="number"
+                                    value="1710"
+                                    min="1"
+                                    required
+                                >
+
+                                <span class="unit">
+                                    sq ft
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="overall-quality">
+                                Overall Quality
+                            </label>
+
+                            <input
+                                id="overall-quality"
+                                type="number"
+                                value="5"
+                                min="1"
+                                max="10"
+                                required
+                            >
+
+                            <small>
+                                1 = low quality, 10 = excellent
+                            </small>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="overall-condition">
+                                Overall Condition
+                            </label>
+
+                            <input
+                                id="overall-condition"
+                                type="number"
+                                value="7"
+                                min="1"
+                                max="10"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="year-built">
+                                Year Built
+                            </label>
+
+                            <input
+                                id="year-built"
+                                type="number"
+                                value="1961"
+                                min="1800"
+                                max="2030"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="year-remodeled">
+                                Year Remodeled
+                            </label>
+
+                            <input
+                                id="year-remodeled"
+                                type="number"
+                                value="1961"
+                                min="1800"
+                                max="2030"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="bedrooms">
+                                Bedrooms
+                            </label>
+
+                            <input
+                                id="bedrooms"
+                                type="number"
+                                value="3"
+                                min="0"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="full-bath">
+                                Full Bathrooms
+                            </label>
+
+                            <input
+                                id="full-bath"
+                                type="number"
+                                value="1"
+                                min="0"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="garage-cars">
+                                Garage Capacity
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <input
+                                    id="garage-cars"
+                                    type="number"
+                                    value="2"
+                                    min="0"
+                                    required
+                                >
+
+                                <span class="unit">
+                                    cars
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="garage-area">
+                                Garage Area
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <input
+                                    id="garage-area"
+                                    type="number"
+                                    value="500"
+                                    min="0"
+                                    required
+                                >
+
+                                <span class="unit">
+                                    sq ft
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="fireplaces">
+                                Fireplaces
+                            </label>
+
+                            <input
+                                id="fireplaces"
+                                type="number"
+                                value="2"
+                                min="0"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="rooms">
+                                Total Rooms
+                            </label>
+
+                            <input
+                                id="rooms"
+                                type="number"
+                                value="7"
+                                min="1"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        id="predict-button"
+                    >
+                        <span id="button-text">
+                            Predict House Price
+                        </span>
+
+                        <span
+                            id="spinner"
+                            class="spinner hidden"
+                        ></span>
+                    </button>
+
+                </form>
+
+
+                <div
+                    id="error-box"
+                    class="error-box hidden"
+                ></div>
+
+
+                <div
+                    id="result-card"
+                    class="result-card hidden"
+                >
+
+                    <p class="result-label">
+                        ESTIMATED SALE PRICE
+                    </p>
+
+                    <h3 id="predicted-price">
+                        $0
+                    </h3>
+
+                    <p class="result-note">
+                        Prediction generated using the currently
+                        deployed production model.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <footer>
+
+            <p>
+                ML Pipeline · ZenML · MLflow · FastAPI
+            </p>
+
+        </footer>
+
+    </main>
+
+
+    <script src="/static/script.js"></script>
+
+</body>
+</html>
