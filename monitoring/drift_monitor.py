@@ -4,22 +4,21 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-MIN_PRODUCTION_SAMPLES = 30
-
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-REFERENCE_DATA_PATH = (
+REFERENCE_PROFILE_PATH = (
     PROJECT_ROOT
-    / "extracted_data"
-    / "AmesHousing.csv"
+    / "monitoring"
+    / "reference_profile.json"
 )
 
-PREDICTION_LOG_PATH = (
+PREDICTIONS_LOG_PATH = (
     PROJECT_ROOT
     / "monitoring"
     / "logs"
     / "predictions.jsonl"
 )
+
 
 MONITORED_FEATURES = [
     "Lot Area",
@@ -31,248 +30,356 @@ MONITORED_FEATURES = [
 ]
 
 
-def load_reference_data() -> pd.DataFrame:
-    """Load training/reference data."""
-    return pd.read_csv(
-        REFERENCE_DATA_PATH
-    )
+MIN_PRODUCTION_SAMPLES = 30
+
+EPSILON = 1e-6
 
 
-def load_production_data() -> pd.DataFrame:
-    """Load production prediction logs."""
+def load_reference_profile() -> dict:
+    if not REFERENCE_PROFILE_PATH.exists():
+        raise FileNotFoundError(
+            
+                "Reference profile not found: "
+                f"{REFERENCE_PROFILE_PATH}"
+            
+        )
 
-    records = []
-
-    with PREDICTION_LOG_PATH.open(
+    with REFERENCE_PROFILE_PATH.open(
         "r",
         encoding="utf-8",
     ) as file:
+        return json.load(
+            file
+        )
 
+
+def load_production_data() -> pd.DataFrame:
+    if not PREDICTIONS_LOG_PATH.exists():
+        return pd.DataFrame()
+
+    records = []
+
+    with PREDICTIONS_LOG_PATH.open(
+        "r",
+        encoding="utf-8",
+    ) as file:
         for line in file:
-            record = json.loads(line)
+            line = line.strip()
 
-            production_record = (
-                record["features"].copy()
+            if not line:
+                continue
+
+            record = json.loads(
+                line
             )
 
-            production_record[
-                "prediction"
-            ] = record["prediction"]
+            features = record.get(
+                "features",
+                {},
+            )
 
             records.append(
-                production_record
+                features
             )
 
-    return pd.DataFrame(records)
+    return pd.DataFrame(
+        records
+    )
 
 
-def population_stability_index(
-    reference: pd.Series,
-    current: pd.Series,
-    bins: int = 10,
+def calculate_production_distribution(
+    series: pd.Series,
+    bin_edges: list[float],
+) -> np.ndarray:
+    clean_series = pd.to_numeric(
+        series,
+        errors="coerce",
+    ).dropna()
+
+    counts, _ = np.histogram(
+        clean_series,
+        bins=bin_edges,
+    )
+
+    total = counts.sum()
+
+    if total == 0:
+        return np.zeros(
+            len(counts),
+            dtype=float,
+        )
+
+    return (
+        counts
+        / total
+    )
+
+
+def calculate_psi(
+    expected_distribution: list[float],
+    actual_distribution: np.ndarray,
 ) -> float:
-    """
-    Calculate Population Stability Index (PSI).
+    expected = np.asarray(
+        expected_distribution,
+        dtype=float,
+    )
 
-    Common interpretation:
-        PSI < 0.10  -> little/no drift
-        0.10-0.25   -> moderate drift
-        PSI > 0.25  -> significant drift
-    """
+    actual = np.asarray(
+        actual_distribution,
+        dtype=float,
+    )
 
-    reference = (
-        pd.to_numeric(
-            reference,
-            errors="coerce",
+    if len(expected) != len(actual):
+        raise ValueError(
+            
+                "Expected and actual distributions "
+                "must contain the same number of bins."
+            
         )
-        .dropna()
-        .to_numpy()
-    )
 
-    current = (
-        pd.to_numeric(
-            current,
-            errors="coerce",
-        )
-        .dropna()
-        .to_numpy()
-    )
-
-    if (
-        len(reference) == 0
-        or len(current) == 0
-    ):
-        return np.nan
-
-    breakpoints = np.quantile(
-        reference,
-        np.linspace(
-            0,
-            1,
-            bins + 1,
-        ),
-    )
-
-    breakpoints = np.unique(
-        breakpoints
-    )
-
-    if len(breakpoints) < 3:
-        return 0.0
-
-    breakpoints[0] = -np.inf
-    breakpoints[-1] = np.inf
-
-    reference_counts, _ = np.histogram(
-        reference,
-        bins=breakpoints,
-    )
-
-    current_counts, _ = np.histogram(
-        current,
-        bins=breakpoints,
-    )
-
-    reference_pct = (
-        reference_counts
-        / reference_counts.sum()
-    )
-
-    current_pct = (
-        current_counts
-        / current_counts.sum()
-    )
-
-    epsilon = 1e-6
-
-    reference_pct = np.clip(
-        reference_pct,
-        epsilon,
+    expected = np.clip(
+        expected,
+        EPSILON,
         None,
     )
 
-    current_pct = np.clip(
-        current_pct,
-        epsilon,
+    actual = np.clip(
+        actual,
+        EPSILON,
         None,
     )
 
-    psi = np.sum(
-        (
-            current_pct
-            - reference_pct
-        )
-        * np.log(
-            current_pct
-            / reference_pct
+    psi_values = (
+        actual
+        - expected
+    ) * np.log(
+        actual
+        / expected
+    )
+
+    return float(
+        np.sum(
+            psi_values
         )
     )
 
-    return float(psi)
 
-
-def drift_status(
+def classify_psi(
     psi: float,
 ) -> str:
-
-    if np.isnan(psi):
-        return "insufficient_data"
-
-    if psi < 0.10:
-        return "stable"
+    if psi < 0.1:
+        return "no_significant_drift"
 
     if psi < 0.25:
         return "moderate_drift"
 
     return "significant_drift"
 
-def overall_drift_status(report: pd.DataFrame) -> str:
-    statuses = set(report["status"])
 
-    if "significant_drift" in statuses:
+def generate_drift_report() -> pd.DataFrame:
+    reference_profile = (
+        load_reference_profile()
+    )
+
+    production_data = (
+        load_production_data()
+    )
+
+    report_rows = []
+
+    for feature in MONITORED_FEATURES:
+        reference_feature = (
+            reference_profile[
+                "features"
+            ][feature]
+        )
+
+        reference_mean = (
+            reference_feature[
+                "mean"
+            ]
+        )
+
+        if (
+            production_data.empty
+            or feature
+            not in production_data.columns
+        ):
+            report_rows.append(
+                {
+                    "feature": feature,
+                    "reference_mean": (
+                        reference_mean
+                    ),
+                    "production_mean": None,
+                    "production_samples": 0,
+                    "psi": None,
+                    "status": (
+                        "insufficient_data"
+                    ),
+                }
+            )
+
+            continue
+
+        production_series = (
+            pd.to_numeric(
+                production_data[
+                    feature
+                ],
+                errors="coerce",
+            ).dropna()
+        )
+
+        production_samples = (
+            len(
+                production_series
+            )
+        )
+
+        production_mean = (
+            float(
+                production_series.mean()
+            )
+            if production_samples > 0
+            else None
+        )
+
+        if (
+            production_samples
+            < MIN_PRODUCTION_SAMPLES
+        ):
+            report_rows.append(
+                {
+                    "feature": feature,
+                    "reference_mean": (
+                        reference_mean
+                    ),
+                    "production_mean": (
+                        production_mean
+                    ),
+                    "production_samples": (
+                        production_samples
+                    ),
+                    "psi": None,
+                    "status": (
+                        "insufficient_data"
+                    ),
+                }
+            )
+
+            continue
+
+        bin_edges = [
+            float(value)
+            for value in (
+                reference_feature[
+                    "bin_edges"
+                ]
+            )
+        ]
+
+        expected_distribution = (
+            reference_feature[
+                "expected_distribution"
+            ]
+        )
+
+        actual_distribution = (
+            calculate_production_distribution(
+                production_series,
+                bin_edges,
+            )
+        )
+
+        psi = calculate_psi(
+            expected_distribution=(
+                expected_distribution
+            ),
+            actual_distribution=(
+                actual_distribution
+            ),
+        )
+
+        report_rows.append(
+            {
+                "feature": feature,
+                "reference_mean": (
+                    reference_mean
+                ),
+                "production_mean": (
+                    production_mean
+                ),
+                "production_samples": (
+                    production_samples
+                ),
+                "psi": psi,
+                "status": (
+                    classify_psi(
+                        psi
+                    )
+                ),
+            }
+        )
+
+    return pd.DataFrame(
+        report_rows
+    )
+
+
+def overall_drift_status(
+    report: pd.DataFrame,
+) -> str:
+    if report.empty:
+        return "insufficient_data"
+
+    statuses = set(
+        report[
+            "status"
+        ].tolist()
+    )
+
+    if (
+        "significant_drift"
+        in statuses
+    ):
         return "critical"
 
-    if "moderate_drift" in statuses:
+    if (
+        "moderate_drift"
+        in statuses
+    ):
         return "warning"
 
-    if statuses == {"insufficient_data"}:
+    if statuses == {
+        "insufficient_data"
+    }:
         return "insufficient_data"
 
     return "healthy"
 
 
-def generate_drift_report() -> pd.DataFrame:
-
-    reference_df = load_reference_data()
-    production_df = load_production_data()
-
-    results = []
-
-    production_sample_size = len(
-        production_df
-    )
-
-    for feature in MONITORED_FEATURES:
-
-        if (
-            production_sample_size
-            < MIN_PRODUCTION_SAMPLES
-        ):
-            results.append(
-                {
-            "feature": feature,
-            "reference_mean": reference_df[
-                feature
-            ].mean(),
-            "production_mean": production_df[
-                feature
-            ].mean(),
-            "production_samples": production_sample_size,
-            "psi": None,
-            "status": "insufficient_data",
-        }
-    )
-            continue
-
-        psi = population_stability_index(
-            reference_df[feature],
-            production_df[feature],
-        )
-
-        results.append(
-            {
-                "feature": feature,
-                "reference_mean": (
-                    reference_df[
-                        feature
-                    ].mean()
-                ),
-                "production_mean": (
-                    production_df[
-                        feature
-                    ].mean()
-                ),
-                "production_samples": (
-                    production_sample_size
-                ),
-                "psi": psi,
-                "status": drift_status(
-                    psi
-                ),
-            }
-        )
-
-    return pd.DataFrame(results)
 if __name__ == "__main__":
-
-    report = generate_drift_report()
-
-    print(
-        "\nDATA DRIFT REPORT\n"
+    drift_report = (
+        generate_drift_report()
     )
 
     print(
-        report.to_string(
+        "\nDRIFT REPORT\n"
+    )
+
+    print(
+        drift_report.to_string(
             index=False
+        )
+    )
+
+    print(
+        "\nOVERALL STATUS:"
+    )
+
+    print(
+        overall_drift_status(
+            drift_report
         )
     )
