@@ -31,3 +31,4 @@ extracted_data/
 *.log
 
 .ipynb_checkpoints/
+monitoring/logs/
