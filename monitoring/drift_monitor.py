@@ -4,6 +4,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+PRODUCTION_WINDOW_SIZE = 100
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 REFERENCE_PROFILE_PATH = (
@@ -82,10 +84,18 @@ def load_production_data() -> pd.DataFrame:
                 features
             )
 
-    return pd.DataFrame(
+    dataframe = pd.DataFrame(
         records
     )
 
+    if dataframe.empty:
+        return dataframe
+
+    return dataframe.tail(
+        PRODUCTION_WINDOW_SIZE
+    ).reset_index(
+        drop=True
+    )
 
 def calculate_production_distribution(
     series: pd.Series,

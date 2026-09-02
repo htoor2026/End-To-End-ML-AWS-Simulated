@@ -9,6 +9,8 @@ from sklearn.metrics import (
     r2_score,
 )
 
+PERFORMANCE_WINDOW_SIZE = 50
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 ACTUALS_LOG_PATH = (
@@ -40,7 +42,18 @@ def load_actuals() -> pd.DataFrame:
                 json.loads(line)
             )
 
-    return pd.DataFrame(records)
+    dataframe = pd.DataFrame(
+    records
+)
+
+    if dataframe.empty:
+        return dataframe
+
+    return dataframe.tail(
+        PERFORMANCE_WINDOW_SIZE
+).reset_index(
+    drop=True
+)
 
 
 def calculate_performance() -> dict:
