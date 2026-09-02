@@ -286,3 +286,175 @@ def test_prediction_is_positive_for_valid_example(mock_post):
     ]
 
     assert prediction > 0
+
+def test_retraining_lifecycle_waits_for_more_labels(
+    monkeypatch,
+):
+    mock_result = {
+        "lifecycle_completed": False,
+        "promoted": False,
+        "decision": "wait_for_more_labels",
+        "evaluation_result": {
+            "evaluation_started": False,
+            "decision": "wait_for_more_labels",
+        },
+    }
+
+    monkeypatch.setattr(
+        "api.main.run_retraining_lifecycle",
+        lambda: mock_result,
+    )
+
+    response = client.post(
+        "/retraining/lifecycle"
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert (
+        data["lifecycle_completed"]
+        is False
+    )
+
+    assert (
+        data["promoted"]
+        is False
+    )
+
+    assert (
+        data["decision"]
+        == "wait_for_more_labels"
+    )
+
+def test_registry_promotion_rejects_bad_candidate(
+    monkeypatch,
+):
+    champion = {
+        "model_name": "prices_predictor",
+        "alias": "champion",
+        "version": "1",
+        "run_id": "champion-run",
+    }
+
+    champion_evaluation = {
+        "evaluated": True,
+        "run_id": "champion-run",
+        "rows": 50,
+        "metrics": {
+            "mae": 13000.0,
+            "rmse": 18000.0,
+            "r2": 0.92,
+        },
+    }
+
+    candidate_evaluation = {
+        "evaluated": True,
+        "run_id": "candidate-run",
+        "rows": 50,
+        "metrics": {
+            "mae": 14000.0,
+            "rmse": 20000.0,
+            "r2": 0.90,
+        },
+    }
+
+    monkeypatch.setattr(
+        "api.main.get_champion",
+        lambda: champion,
+    )
+
+    def mock_evaluation(run_id):
+        if run_id == "champion-run":
+            return champion_evaluation
+
+        return candidate_evaluation
+
+    monkeypatch.setattr(
+        "api.main.evaluate_run_on_production_data",
+        mock_evaluation,
+    )
+
+    response = client.post(
+        "/promotion/registry",
+        json={
+            "candidate_run_id": "candidate-run"
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["promoted"] is False
+    assert data["decision"] == "reject_candidate"
+
+    assert (
+        data["gates"][
+            "mae_improved_enough"
+        ]
+        is False
+    )
+
+def test_registry_promotion_blocks_insufficient_evaluation_data(
+    monkeypatch,
+):
+    champion = {
+        "model_name": "prices_predictor",
+        "alias": "champion",
+        "version": "1",
+        "run_id": "champion-run",
+    }
+
+    insufficient_evaluation = {
+        "evaluated": False,
+        "reason": (
+            "Not enough labelled production data "
+            "for shared model evaluation."
+        ),
+        "rows": 1,
+        "minimum_required": 10,
+    }
+
+    monkeypatch.setattr(
+        "api.main.get_champion",
+        lambda: champion,
+    )
+
+    monkeypatch.setattr(
+        "api.main.evaluate_run_on_production_data",
+        lambda run_id: insufficient_evaluation,
+    )
+
+    response = client.post(
+        "/promotion/registry",
+        json={
+            "candidate_run_id": "candidate-run"
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["promoted"] is False
+
+    assert (
+        data["decision"]
+        == "insufficient_evaluation_data"
+    )
+
+    assert (
+        data["champion_evaluation"][
+            "evaluated"
+        ]
+        is False
+    )
+
+    assert (
+        data["champion_evaluation"][
+            "rows"
+        ]
+        == 1
+    )

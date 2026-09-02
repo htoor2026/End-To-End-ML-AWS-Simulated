@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir -r requirements-api.txt
 
 COPY api ./api
 COPY frontend ./frontend
+COPY monitoring ./monitoring
 
 EXPOSE 8001
 

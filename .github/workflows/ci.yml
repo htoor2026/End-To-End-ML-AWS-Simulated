@@ -15,7 +15,7 @@ on:
 jobs:
 
   test:
-    name: Run API Tests
+    name: Run Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -23,13 +23,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
-
 
       - name: Install dependencies
         run: |
@@ -37,15 +35,13 @@ jobs:
           pip install -r requirements-api.txt
           pip install pytest httpx ruff
 
-
       - name: Check code with Ruff
         run: |
-          ruff check api tests
-
+          ruff check api monitoring tests
 
       - name: Run automated tests
         run: |
-          python -m pytest tests/test_api.py -v
+          python -m pytest tests -v
 
 
   docker:
@@ -59,7 +55,6 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
-
 
       - name: Build Docker image
         run: |
