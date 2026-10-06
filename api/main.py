@@ -16,6 +16,7 @@ from prometheus_client import (
 )
 from pydantic import BaseModel, ConfigDict, Field
 
+from deployment.model_loader import predict_bundled
 from monitoring.actuals_logger import log_actual
 from monitoring.drift_monitor import (
     generate_drift_report,
@@ -102,6 +103,11 @@ FRONTEND_DIR = (
     / "frontend"
 )
 
+
+MODEL_BACKEND = os.getenv(
+    "MODEL_BACKEND",
+    "mlflow",
+).strip().lower()
 
 MLFLOW_MODEL_URL = os.getenv(
     "MLFLOW_MODEL_URL",
@@ -561,6 +567,7 @@ def model_info():
         "task": "regression",
         "target": "SalePrice",
         "status": "active",
+        "inference_backend": MODEL_BACKEND,
     }
 
 
@@ -621,6 +628,62 @@ def predict(
             by_alias=True
         )
     )
+
+    if MODEL_BACKEND == "bundled":
+        try:
+            prediction = predict_bundled(
+                house_data
+            )
+
+        except FileNotFoundError as error:
+            PREDICTION_ERROR_COUNT.inc()
+
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    "Bundled production model "
+                    "is unavailable."
+                ),
+            ) from error
+
+        except Exception as error:
+            PREDICTION_ERROR_COUNT.inc()
+
+            raise HTTPException(
+                status_code=500,
+                detail=(
+                    "Bundled model prediction "
+                    f"failed: {error!s}"
+                ),
+            ) from error
+
+        log_prediction(
+            request_id=(
+                request.state.request_id
+            ),
+            features=house_data,
+            prediction=prediction,
+        )
+
+        return {
+            "status": "success",
+            "predicted_price": round(
+                prediction,
+                2,
+            ),
+            "currency": "USD",
+        }
+
+    if MODEL_BACKEND != "mlflow":
+        PREDICTION_ERROR_COUNT.inc()
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Unsupported MODEL_BACKEND. "
+                "Use 'mlflow' or 'bundled'."
+            ),
+        )
 
     payload = {
         "dataframe_records": [
