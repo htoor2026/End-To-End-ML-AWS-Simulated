@@ -1,11 +1,3 @@
-# import sys
-
-# sys.path.insert(
-#     0,
-#     "/Users/toor/Desktop/End_To_End_ML_Project/prices-predictor-system"
-# )
-
-
 import pandas as pd
 from src.ingest_data import DataIngestorFactory
 from zenml import step

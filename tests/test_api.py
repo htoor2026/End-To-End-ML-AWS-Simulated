@@ -458,3 +458,261 @@ def test_registry_promotion_blocks_insufficient_evaluation_data(
         ]
         == 1
     )
+
+def test_registry_promotion_succeeds_for_good_candidate(
+    monkeypatch,
+):
+    champion = {
+        "model_name": "prices_predictor",
+        "alias": "champion",
+        "version": "1",
+        "run_id": "champion-run",
+    }
+
+    champion_evaluation = {
+        "evaluated": True,
+        "run_id": "champion-run",
+        "rows": 50,
+        "metrics": {
+            "mae": 13000.0,
+            "rmse": 18000.0,
+            "r2": 0.92,
+        },
+    }
+
+    candidate_evaluation = {
+        "evaluated": True,
+        "run_id": "candidate-run",
+        "rows": 50,
+        "metrics": {
+            "mae": 12000.0,
+            "rmse": 17500.0,
+            "r2": 0.93,
+        },
+    }
+
+    monkeypatch.setattr(
+        "api.main.get_champion",
+        lambda: champion,
+    )
+
+    def mock_evaluation(run_id):
+        if run_id == "champion-run":
+            return champion_evaluation
+
+        return candidate_evaluation
+
+    monkeypatch.setattr(
+        "api.main.evaluate_run_on_production_data",
+        mock_evaluation,
+    )
+
+    monkeypatch.setattr(
+        "api.main.get_or_register_model_version",
+        lambda run_id: {
+            "model_name": "prices_predictor",
+            "version": "2",
+            "run_id": run_id,
+            "already_registered": False,
+        },
+    )
+
+    monkeypatch.setattr(
+        "api.main.promote_candidate",
+        lambda version: {
+            "status": "promoted",
+            "model_name": "prices_predictor",
+            "previous_champion": {
+                "version": "1",
+                "run_id": "champion-run",
+            },
+            "new_champion": {
+                "version": version,
+                "run_id": "candidate-run",
+            },
+        },
+    )
+
+    response = client.post(
+        "/promotion/registry",
+        json={
+            "candidate_run_id": "candidate-run"
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["promoted"] is True
+
+    assert (
+        data["evaluation"]["decision"]
+        == "promote_candidate"
+    )
+
+    assert (
+        data["registry"]["status"]
+        == "promoted"
+    )
+
+    assert (
+        data["registry"][
+            "new_champion"
+        ]["version"]
+        == "2"
+    )
+
+def test_registry_promotion_skips_current_champion(
+    monkeypatch,
+):
+    champion = {
+        "model_name": "prices_predictor",
+        "alias": "champion",
+        "version": "1",
+        "run_id": "champion-run",
+    }
+
+    monkeypatch.setattr(
+        "api.main.get_champion",
+        lambda: champion,
+    )
+
+    response = client.post(
+        "/promotion/registry",
+        json={
+            "candidate_run_id": "champion-run"
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["promoted"] is False
+
+    assert (
+        data["decision"]
+        == "already_champion"
+    )
+
+def test_registry_rollback(
+    monkeypatch,
+):
+    rollback_result = {
+        "status": "rolled_back",
+        "model_name": "prices_predictor",
+        "rolled_back_from": {
+            "version": "2",
+            "run_id": "candidate-run",
+        },
+        "restored_champion": {
+            "version": "1",
+            "run_id": "champion-run",
+        },
+    }
+
+    monkeypatch.setattr(
+        "api.main.rollback_champion",
+        lambda: rollback_result,
+    )
+
+    response = client.post(
+        "/rollback/registry"
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["rolled_back"] is True
+
+    assert (
+        data["status"]
+        == "rolled_back"
+    )
+
+    assert (
+        data["restored_champion"][
+            "version"
+        ]
+        == "1"
+    )
+
+    assert (
+        data["rolled_back_from"][
+            "version"
+        ]
+        == "2"
+    )
+
+def test_registry_promotion_check_uses_shared_evaluation(
+    monkeypatch,
+):
+    champion = {
+        "model_name": "prices_predictor",
+        "alias": "champion",
+        "version": "1",
+        "run_id": "champion-run",
+    }
+
+    champion_evaluation = {
+        "evaluated": True,
+        "run_id": "champion-run",
+        "rows": 40,
+        "metrics": {
+            "mae": 13000.0,
+            "rmse": 18000.0,
+            "r2": 0.92,
+        },
+    }
+
+    candidate_evaluation = {
+        "evaluated": True,
+        "run_id": "candidate-run",
+        "rows": 40,
+        "metrics": {
+            "mae": 12000.0,
+            "rmse": 17500.0,
+            "r2": 0.93,
+        },
+    }
+
+    monkeypatch.setattr(
+        "api.main.get_champion",
+        lambda: champion,
+    )
+
+    def mock_evaluation(run_id):
+        if run_id == "champion-run":
+            return champion_evaluation
+
+        return candidate_evaluation
+
+    monkeypatch.setattr(
+        "api.main.evaluate_run_on_production_data",
+        mock_evaluation,
+    )
+
+    response = client.post(
+        "/promotion-check/registry",
+        json={
+            "candidate_run_id": "candidate-run"
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["promote"] is True
+
+    assert (
+        data["decision"]
+        == "promote_candidate"
+    )
+
+    assert (
+        data["evaluation_rows"]
+        == 40
+    )
