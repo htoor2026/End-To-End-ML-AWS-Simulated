@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -25,7 +24,7 @@
             <div class="hero-content">
 
                 <p class="eyebrow">
-                    MACHINE LEARNING PRICE ESTIMATION
+                    END-TO-END MACHINE LEARNING SYSTEM
                 </p>
 
                 <h1>
@@ -34,18 +33,15 @@
                 </h1>
 
                 <p class="subtitle">
-                    Enter the property details below and get an
-                    ML-powered estimated sale price.
+                    A house-price prediction product with model serving,
+                    monitoring, retraining, promotion, and rollback.
                 </p>
 
                 <div class="model-status">
-
-                    <span class="status-dot"></span>
-
-                    <span>
-                        Production model active
+                    <span class="status-dot" id="hero-status-dot"></span>
+                    <span id="hero-status-text">
+                        Checking API status...
                     </span>
-
                 </div>
 
             </div>
@@ -53,329 +49,677 @@
         </section>
 
 
-        <section class="prediction-section">
+        <section class="workspace">
 
-            <div class="card">
+            <div class="tabs" role="tablist" aria-label="Project views">
 
-                <div class="card-header">
+                <button
+                    type="button"
+                    class="tab-button active"
+                    data-tab="business"
+                    role="tab"
+                    aria-selected="true"
+                >
+                    Business Overview
+                </button>
 
-                    <div>
+                <button
+                    type="button"
+                    class="tab-button"
+                    data-tab="technical"
+                    role="tab"
+                    aria-selected="false"
+                >
+                    Technical Overview
+                </button>
+
+            </div>
+
+
+            <section
+                id="business-tab"
+                class="tab-panel active"
+                role="tabpanel"
+            >
+
+                <div class="overview-grid">
+
+                    <article class="overview-card">
                         <p class="section-label">
-                            PROPERTY DETAILS
+                            BUSINESS PROBLEM
                         </p>
 
                         <h2>
-                            Estimate a property value
+                            Estimate property value quickly
                         </h2>
-                    </div>
+
+                        <p>
+                            The model converts property characteristics
+                            into an estimated sale price, giving users a
+                            consistent data-driven starting point for
+                            valuation.
+                        </p>
+                    </article>
+
+
+                    <article class="metric-card">
+                        <span class="metric-value">
+                            ~$13K
+                        </span>
+
+                        <span class="metric-label">
+                            Average absolute test error
+                        </span>
+                    </article>
+
+
+                    <article class="metric-card">
+                        <span class="metric-value">
+                            92.2%
+                        </span>
+
+                        <span class="metric-label">
+                            Variance explained by the champion model
+                        </span>
+                    </article>
 
                 </div>
 
 
-                <form id="prediction-form">
+                <div class="business-message">
 
-                    <div class="form-grid">
+                    <div>
+                        <p class="section-label">
+                            WHY THE SYSTEM MATTERS
+                        </p>
 
-                        <div class="form-group">
+                        <h2>
+                            The project continues after prediction
+                        </h2>
+                    </div>
 
-                            <label for="lot-area">
-                                Lot Area
-                            </label>
+                    <p>
+                        Production predictions are monitored over time.
+                        When real sale prices arrive, the system measures
+                        model performance, decides whether retraining is
+                        justified, compares a candidate against the
+                        champion, and keeps rollback available.
+                    </p>
 
-                            <div class="input-wrapper">
+                </div>
 
-                                <input
-                                    id="lot-area"
-                                    type="number"
-                                    value="9600"
-                                    min="1"
-                                    required
-                                >
 
-                                <span class="unit">
-                                    sq ft
-                                </span>
+                <div class="card prediction-card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <p class="section-label">
+                                LIVE DEMO
+                            </p>
+
+                            <h2>
+                                Estimate a property value
+                            </h2>
+
+                            <p class="card-description">
+                                Change the most important property details.
+                                Remaining model inputs use fixed demo values.
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <form id="prediction-form">
+
+                        <div class="form-grid">
+
+                            <div class="form-group">
+
+                                <label for="lot-area">
+                                    Lot Area
+                                </label>
+
+                                <div class="input-wrapper">
+
+                                    <input
+                                        id="lot-area"
+                                        type="number"
+                                        value="9600"
+                                        min="1"
+                                        required
+                                    >
+
+                                    <span class="unit">
+                                        sq ft
+                                    </span>
+
+                                </div>
 
                             </div>
 
-                        </div>
 
+                            <div class="form-group">
 
-                        <div class="form-group">
+                                <label for="living-area">
+                                    Living Area
+                                </label>
 
-                            <label for="living-area">
-                                Living Area
-                            </label>
+                                <div class="input-wrapper">
 
-                            <div class="input-wrapper">
+                                    <input
+                                        id="living-area"
+                                        type="number"
+                                        value="1710"
+                                        min="1"
+                                        required
+                                    >
 
-                                <input
-                                    id="living-area"
-                                    type="number"
-                                    value="1710"
-                                    min="1"
-                                    required
-                                >
+                                    <span class="unit">
+                                        sq ft
+                                    </span>
 
-                                <span class="unit">
-                                    sq ft
-                                </span>
+                                </div>
 
                             </div>
 
-                        </div>
 
+                            <div class="form-group">
 
-                        <div class="form-group">
-
-                            <label for="overall-quality">
-                                Overall Quality
-                            </label>
-
-                            <input
-                                id="overall-quality"
-                                type="number"
-                                value="5"
-                                min="1"
-                                max="10"
-                                required
-                            >
-
-                            <small>
-                                1 = low quality, 10 = excellent
-                            </small>
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label for="overall-condition">
-                                Overall Condition
-                            </label>
-
-                            <input
-                                id="overall-condition"
-                                type="number"
-                                value="7"
-                                min="1"
-                                max="10"
-                                required
-                            >
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label for="year-built">
-                                Year Built
-                            </label>
-
-                            <input
-                                id="year-built"
-                                type="number"
-                                value="1961"
-                                min="1800"
-                                max="2030"
-                                required
-                            >
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label for="year-remodeled">
-                                Year Remodeled
-                            </label>
-
-                            <input
-                                id="year-remodeled"
-                                type="number"
-                                value="1961"
-                                min="1800"
-                                max="2030"
-                                required
-                            >
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label for="bedrooms">
-                                Bedrooms
-                            </label>
-
-                            <input
-                                id="bedrooms"
-                                type="number"
-                                value="3"
-                                min="0"
-                                required
-                            >
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label for="full-bath">
-                                Full Bathrooms
-                            </label>
-
-                            <input
-                                id="full-bath"
-                                type="number"
-                                value="1"
-                                min="0"
-                                required
-                            >
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label for="garage-cars">
-                                Garage Capacity
-                            </label>
-
-                            <div class="input-wrapper">
+                                <label for="overall-quality">
+                                    Overall Quality
+                                </label>
 
                                 <input
-                                    id="garage-cars"
+                                    id="overall-quality"
+                                    type="number"
+                                    value="5"
+                                    min="1"
+                                    max="10"
+                                    required
+                                >
+
+                                <small>
+                                    1 = low quality, 10 = excellent
+                                </small>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="overall-condition">
+                                    Overall Condition
+                                </label>
+
+                                <input
+                                    id="overall-condition"
+                                    type="number"
+                                    value="7"
+                                    min="1"
+                                    max="10"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="year-built">
+                                    Year Built
+                                </label>
+
+                                <input
+                                    id="year-built"
+                                    type="number"
+                                    value="1961"
+                                    min="1800"
+                                    max="2030"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="year-remodeled">
+                                    Year Remodeled
+                                </label>
+
+                                <input
+                                    id="year-remodeled"
+                                    type="number"
+                                    value="1961"
+                                    min="1800"
+                                    max="2030"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="bedrooms">
+                                    Bedrooms
+                                </label>
+
+                                <input
+                                    id="bedrooms"
+                                    type="number"
+                                    value="3"
+                                    min="0"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="full-bath">
+                                    Full Bathrooms
+                                </label>
+
+                                <input
+                                    id="full-bath"
+                                    type="number"
+                                    value="1"
+                                    min="0"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="garage-cars">
+                                    Garage Capacity
+                                </label>
+
+                                <div class="input-wrapper">
+
+                                    <input
+                                        id="garage-cars"
+                                        type="number"
+                                        value="2"
+                                        min="0"
+                                        required
+                                    >
+
+                                    <span class="unit">
+                                        cars
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="garage-area">
+                                    Garage Area
+                                </label>
+
+                                <div class="input-wrapper">
+
+                                    <input
+                                        id="garage-area"
+                                        type="number"
+                                        value="500"
+                                        min="0"
+                                        required
+                                    >
+
+                                    <span class="unit">
+                                        sq ft
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="fireplaces">
+                                    Fireplaces
+                                </label>
+
+                                <input
+                                    id="fireplaces"
                                     type="number"
                                     value="2"
                                     min="0"
                                     required
                                 >
 
-                                <span class="unit">
-                                    cars
-                                </span>
-
                             </div>
 
-                        </div>
 
+                            <div class="form-group">
 
-                        <div class="form-group">
-
-                            <label for="garage-area">
-                                Garage Area
-                            </label>
-
-                            <div class="input-wrapper">
+                                <label for="rooms">
+                                    Total Rooms
+                                </label>
 
                                 <input
-                                    id="garage-area"
+                                    id="rooms"
                                     type="number"
-                                    value="500"
-                                    min="0"
+                                    value="7"
+                                    min="1"
                                     required
                                 >
 
-                                <span class="unit">
-                                    sq ft
-                                </span>
-
                             </div>
 
                         </div>
 
 
-                        <div class="form-group">
+                        <button
+                            type="submit"
+                            id="predict-button"
+                            class="primary-button"
+                        >
+                            <span id="button-text">
+                                Predict House Price
+                            </span>
 
-                            <label for="fireplaces">
-                                Fireplaces
-                            </label>
+                            <span
+                                id="spinner"
+                                class="spinner hidden"
+                            ></span>
+                        </button>
 
-                            <input
-                                id="fireplaces"
-                                type="number"
-                                value="2"
-                                min="0"
-                                required
-                            >
-
-                        </div>
+                    </form>
 
 
-                        <div class="form-group">
+                    <div
+                        id="error-box"
+                        class="error-box hidden"
+                    ></div>
 
-                            <label for="rooms">
-                                Total Rooms
-                            </label>
 
-                            <input
-                                id="rooms"
-                                type="number"
-                                value="7"
-                                min="1"
-                                required
-                            >
+                    <div
+                        id="result-card"
+                        class="result-card hidden"
+                    >
 
-                        </div>
+                        <p class="result-label">
+                            ESTIMATED SALE PRICE
+                        </p>
+
+                        <h3 id="predicted-price">
+                            $0
+                        </h3>
+
+                        <p class="result-note">
+                            Generated using the currently served ML model.
+                        </p>
 
                     </div>
 
+                </div>
 
-                    <button
-                        type="submit"
-                        id="predict-button"
+            </section>
+
+
+            <section
+                id="technical-tab"
+                class="tab-panel"
+                role="tabpanel"
+                hidden
+            >
+
+                <div class="technical-intro">
+
+                    <div>
+                        <p class="section-label">
+                            TECHNICAL ARCHITECTURE
+                        </p>
+
+                        <h2>
+                            From training pipeline to production feedback
+                        </h2>
+                    </div>
+
+                    <a
+                        class="secondary-link"
+                        href="/docs"
+                        target="_blank"
+                        rel="noreferrer"
                     >
-                        <span id="button-text">
-                            Predict House Price
-                        </span>
-
-                        <span
-                            id="spinner"
-                            class="spinner hidden"
-                        ></span>
-                    </button>
-
-                </form>
-
-
-                <div
-                    id="error-box"
-                    class="error-box hidden"
-                ></div>
-
-
-                <div
-                    id="result-card"
-                    class="result-card hidden"
-                >
-
-                    <p class="result-label">
-                        ESTIMATED SALE PRICE
-                    </p>
-
-                    <h3 id="predicted-price">
-                        $0
-                    </h3>
-
-                    <p class="result-note">
-                        Prediction generated using the currently
-                        deployed production model.
-                    </p>
+                        Open API Docs
+                    </a>
 
                 </div>
 
-            </div>
+
+                <div class="architecture-flow">
+
+                    <div class="flow-node">
+                        <span>1</span>
+                        <strong>Ames Data</strong>
+                        <small>Training source</small>
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node">
+                        <span>2</span>
+                        <strong>ZenML</strong>
+                        <small>Pipeline orchestration</small>
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node">
+                        <span>3</span>
+                        <strong>MLflow</strong>
+                        <small>Tracking + registry</small>
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node">
+                        <span>4</span>
+                        <strong>FastAPI</strong>
+                        <small>Prediction service</small>
+                    </div>
+
+                    <div class="flow-arrow">→</div>
+
+                    <div class="flow-node">
+                        <span>5</span>
+                        <strong>Monitoring</strong>
+                        <small>Drift + performance</small>
+                    </div>
+
+                </div>
+
+
+                <div class="status-section">
+
+                    <div class="section-heading">
+                        <p class="section-label">
+                            LIVE SYSTEM SIGNALS
+                        </p>
+
+                        <h2>
+                            Current application state
+                        </h2>
+                    </div>
+
+
+                    <div class="status-grid">
+
+                        <article class="status-card">
+                            <span class="status-card-label">
+                                API
+                            </span>
+
+                            <strong id="api-health">
+                                Checking...
+                            </strong>
+
+                            <small id="api-health-detail">
+                                /health
+                            </small>
+                        </article>
+
+
+                        <article class="status-card">
+                            <span class="status-card-label">
+                                DATA DRIFT
+                            </span>
+
+                            <strong id="drift-health">
+                                Checking...
+                            </strong>
+
+                            <small id="drift-health-detail">
+                                Latest 100 predictions
+                            </small>
+                        </article>
+
+
+                        <article class="status-card">
+                            <span class="status-card-label">
+                                PERFORMANCE
+                            </span>
+
+                            <strong id="performance-health">
+                                Checking...
+                            </strong>
+
+                            <small id="performance-health-detail">
+                                Latest 50 labelled outcomes
+                            </small>
+                        </article>
+
+                    </div>
+
+                </div>
+
+
+                <div class="technical-grid">
+
+                    <article class="technical-card">
+                        <p class="section-label">
+                            MODEL LIFECYCLE
+                        </p>
+
+                        <h3>
+                            Safe retraining and promotion
+                        </h3>
+
+                        <ol class="lifecycle-list">
+                            <li>Log predictions and request IDs</li>
+                            <li>Attach actual sale prices when available</li>
+                            <li>Measure drift and model performance</li>
+                            <li>Require at least 30 labelled samples</li>
+                            <li>Train an MLflow candidate only when performance degrades</li>
+                            <li>Compare champion and candidate</li>
+                            <li>Promote or reject using quality gates</li>
+                            <li>Rollback to the previous champion if needed</li>
+                        </ol>
+                    </article>
+
+
+                    <article class="technical-card">
+                        <p class="section-label">
+                            PROMOTION GATES
+                        </p>
+
+                        <h3>
+                            Candidate quality requirements
+                        </h3>
+
+                        <div class="gate-list">
+                            <div>
+                                <strong>≥ 1%</strong>
+                                <span>MAE improvement</span>
+                            </div>
+
+                            <div>
+                                <strong>≤ 2%</strong>
+                                <span>RMSE degradation</span>
+                            </div>
+
+                            <div>
+                                <strong>≤ 0.005</strong>
+                                <span>R² drop</span>
+                            </div>
+                        </div>
+                    </article>
+
+
+                    <article class="technical-card">
+                        <p class="section-label">
+                            ENGINEERING
+                        </p>
+
+                        <h3>
+                            Reliability controls
+                        </h3>
+
+                        <ul class="compact-list">
+                            <li>28 automated tests</li>
+                            <li>Ruff linting</li>
+                            <li>GitHub Actions CI</li>
+                            <li>Docker image build validation</li>
+                            <li>Pydantic input validation</li>
+                            <li>Prometheus-compatible metrics</li>
+                        </ul>
+                    </article>
+
+
+                    <article class="technical-card">
+                        <p class="section-label">
+                            STACK
+                        </p>
+
+                        <h3>
+                            Core technologies
+                        </h3>
+
+                        <div class="tag-list">
+                            <span>Python</span>
+                            <span>scikit-learn</span>
+                            <span>ZenML</span>
+                            <span>MLflow</span>
+                            <span>FastAPI</span>
+                            <span>Docker</span>
+                            <span>Prometheus</span>
+                            <span>GitHub Actions</span>
+                        </div>
+                    </article>
+
+                </div>
+
+
+                <div class="technical-note">
+                    <strong>Current scope:</strong>
+                    local/Docker MLOps demonstration. Production persistence,
+                    remote MLflow infrastructure, automatic serving reload after
+                    champion promotion, and a permanently untouched evaluation
+                    holdout remain future hardening work.
+                </div>
+
+            </section>
 
         </section>
 
 
         <footer>
-
             <p>
-                ML Pipeline · ZenML · MLflow · FastAPI
+                ZenML · MLflow · FastAPI · Docker · Monitoring · CI
             </p>
-
         </footer>
 
     </main>
