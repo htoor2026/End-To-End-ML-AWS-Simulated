@@ -716,3 +716,68 @@ def test_registry_promotion_check_uses_shared_evaluation(
         data["evaluation_rows"]
         == 40
     )
+
+
+def test_bundled_model_prediction(
+    monkeypatch,
+):
+    monkeypatch.setattr(
+        "api.main.MODEL_BACKEND",
+        "bundled",
+    )
+
+    monkeypatch.setattr(
+        "api.main.predict_bundled",
+        lambda features: 190330.70931474073,
+    )
+
+    monkeypatch.setattr(
+        "api.main.log_prediction",
+        lambda **kwargs: None,
+    )
+
+    response = client.post(
+        "/predict",
+        json=VALID_HOUSE,
+    )
+
+    assert response.status_code == 200
+
+    assert response.json() == {
+        "status": "success",
+        "predicted_price": 190330.71,
+        "currency": "USD",
+    }
+
+
+def test_bundled_model_missing(
+    monkeypatch,
+):
+    monkeypatch.setattr(
+        "api.main.MODEL_BACKEND",
+        "bundled",
+    )
+
+    def missing_model(features):
+        raise FileNotFoundError(
+            "model missing"
+        )
+
+    monkeypatch.setattr(
+        "api.main.predict_bundled",
+        missing_model,
+    )
+
+    response = client.post(
+        "/predict",
+        json=VALID_HOUSE,
+    )
+
+    assert response.status_code == 503
+
+    assert response.json() == {
+        "detail": (
+            "Bundled production model "
+            "is unavailable."
+        )
+    }
