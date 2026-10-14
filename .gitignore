@@ -33,3 +33,10 @@ extracted_data/
 .ipynb_checkpoints/
 
 monitoring/logs/
+
+# Local AWS simulation / temporary files
+tmp_download/
+tmp_s3_data/
+tmp_s3_download/
+tmp_s3_models/
+tmp_test.txt

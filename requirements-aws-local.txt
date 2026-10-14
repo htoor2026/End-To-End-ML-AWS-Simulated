@@ -1,0 +1,2 @@
+boto3==<your-boto3-version>
+moto[server]==<your-moto-version>

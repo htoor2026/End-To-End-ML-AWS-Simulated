@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from aws_local.data_source import resolve_training_data_path
 from steps.data_ingestion_step import data_ingestion_step
 from steps.data_splitter_step import data_splitter_step
 from steps.handle_missing_values_step import handle_missing_values_step
@@ -10,7 +10,8 @@ from zenml import Model, pipeline
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DATA_PATH = PROJECT_ROOT / "data" / "archive.zip"
+# DATA_PATH = PROJECT_ROOT / "data" / "archive.zip"
+data_path = resolve_training_data_path()
 
 
 @pipeline(
@@ -24,7 +25,7 @@ def ml_pipeline():
 
     # Data Ingestion Step
     raw_data = data_ingestion_step(
-        file_path=str(DATA_PATH)
+        file_path=str(data_path)
     )
 
     # Handling Missing Values Step
