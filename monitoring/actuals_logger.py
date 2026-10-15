@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -58,7 +58,7 @@ def log_actual(
 
     record = {
         "timestamp": datetime.now(
-            timezone.utc
+            UTC
         ).isoformat(),
         "request_id": request_id,
         "predicted_price": (
