@@ -40,3 +40,16 @@ tmp_s3_data/
 tmp_s3_download/
 tmp_s3_models/
 tmp_test.txt
+
+# Terraform local/generated files
+**/.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+crash.log
+crash.*.log
+*.tfplan
+
+# Local Terraform variable values
+terraform.tfvars
+*.auto.tfvars
