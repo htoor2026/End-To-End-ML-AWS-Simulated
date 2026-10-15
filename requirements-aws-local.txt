@@ -1,2 +1,2 @@
-boto3==<your-boto3-version>
-moto[server]==<your-moto-version>
+boto3==1.43.113
+moto[server]==5.2.4
