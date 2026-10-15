@@ -1,5 +1,7 @@
 # End-to-End House Price ML & MLOps — AWS-Ready / Locally Simulated
 
+**AWS-Ready / Locally Simulated End-to-End ML/MLOps System**
+
 A production-oriented machine learning project built on the **Ames Housing** dataset.
 
 This repository demonstrates the full ML lifecycle:
